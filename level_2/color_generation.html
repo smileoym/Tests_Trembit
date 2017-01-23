@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Document</title>
+    <meta charset="UTF-8">
+    <title>Document</title>
 </head>
 <body>
 <script>
@@ -87,21 +87,36 @@ var params = {
     ]
 };
 
-// Конструктор, который создает елемен в DOM
-function getElementsToScreen (elem) {
+// Конструктор, который создает елемент в DOM
+function ElementsToScreen (elem) {
+    this.backgroundColor = elem.background; // цвет родительского элемента
+    this.timeMarker = elem.updateTime; // интервал обновления цвета
+    this.elements = elem.elements; // массив элементов
+    this.elementsLenght = elem.elements.length; // кол-во элементов
+
     var element = document.createElement('div');
     element.style.height = window.innerHeight / params.lines.length + 'px';
-    element.style.background = elem.background;
-    for(var i = 0; i < elem.elements.length; i++) {
+    element.style.background = this.backgroundColor;
+    for (var i = 0; i < this.elementsLenght; i++) {
         var subElement = document.createElement('div');
-        subElement.style.background = elem.elements[i].background;
+        subElement.style.background = this.elements[i].background;
         subElement.style.height = '100%';
         subElement.style.display = 'inline-block';
-        subElement.style.width = elem.elements[i].width + '%';
+        subElement.style.width = this.elements[i].width + '%';
 
         element.appendChild(subElement);
     };
     document.body.appendChild(element);
+};
+
+// функция создаёт интервалы обновления цвета
+ElementsToScreen.prototype.updataColor = function (index, box) {
+    setInterval(function () {
+        var perentElement =  box.children[index + 1];       
+        for(var i = 0; i < perentElement.children.length; i++) {
+            perentElement.children[i].style.background = getNewColor();
+        };
+    }, this.timeMarker);  
 };
 
 // Функция генерирует новый цвет
@@ -114,25 +129,16 @@ function getNewColor () {
     return color;
 };
 
-// функция создаёт итервалы обновления цвета
-function updataColor (elem, index, box) {
-    setInterval(function () {
-        var perentElement =  box.children[index + 1];       
-        for(var i = 0; i < perentElement.children.length; i++) {
-            perentElement.children[i].style.background = getNewColor();
-        };
-    }, elem.updateTime);  
-};
-
 // Функция вызывает конструктор для генерации елементов
 //  и вызывает интервалы обновления цвета у елементов
 // Принимает аргументы: 
 // obj - объект, который нужно отрисовать через параметр
 // box - область где отрисовывать 
+
 function generationElements (obj, box) {
     for(var i = 0; i < obj.lines.length; i++) {
-        var elem = new getElementsToScreen(obj.lines[i], i);
-        updataColor(obj.lines[i], i, box);
+        var elem = new ElementsToScreen(obj.lines[i], i);
+        elem.updataColor(i, box);
     };    
 };
 
